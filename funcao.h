@@ -1,34 +1,22 @@
-#ifndef FUNCAO_H
-#define FUNCAO_H
+#ifndef funcao_h
+#define funcao_h
 
+#include <stdio.h>
+#include <stdlib.h>
 
-struct Cliente {
-    int cnpj;
-    char razao_social[100];
-    char conta[10];
-    float saldo;
-    int senha;
-};
-
-struct Funcionario {
-    char nome[100];
-    int cpf;
-    int senha;
-};
-
-struct Cliente clientes[100]; // Tamanho máximo para clientes
-int numClientes = 0;
-
-struct Funcionario funcionarios[100]; // Tamanho máximo para funcionários
-int numFuncionarios = 0;
-
-void menu_cliente();
-
-void menu_funcionario();
-
+void novo_funcionario(void);
+void novo_cliente(void);
+void login(void);
+void apagar_cliente(void);
+void listar_clientes(void);
+void apagar_funcionario(void);
+void listar_funcionarios(void);
+void debito(void);
+void deposito(void);
+void extrato(void);
+void transferencia(void);
 void menu_login();
-
-void novo_cliente();
-
+void menu_funcionario();
+void menu_cliente();
 
 #endif
