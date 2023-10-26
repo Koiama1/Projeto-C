@@ -10,6 +10,7 @@ struct Cliente{
     char conta[10];
     float saldo;
     int senha;
+    char historico[500];
 };
 
 struct Funcionario {
@@ -25,8 +26,8 @@ void apagar_clientes(struct Cliente *clientes, int tamanho);
 void listar_clientes(void);
 void apagar_funcionarios(void);
 void listar_funcionarios(void);
-void debito(void);
-void deposito(void);
+void debito(struct Cliente *clientes, int tamanho);
+void deposito(struct Cliente *clientes, int tamanho);
 void extrato(void);
 void transferencia(void);
 void menu_login(void);
