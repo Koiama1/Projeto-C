@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
+
 
 void salvar_cliente(struct Cliente cliente) {
     FILE *arquivo;
@@ -187,18 +189,148 @@ void menu_login() {
 }
 
 
-void debito(){
-  //
+void debito() {
+    int cnpj;
+    printf("Digite seu CNPJ: ");
+    scanf("%d", &cnpj);
+
+    FILE *arquivo = fopen("clientes.dat", "rb+");
+    if (arquivo == NULL) {
+        printf("Erro ao abrir o arquivo de clientes.\n");
+        exit(1);
+    }
+
+    struct Cliente cliente;
+
+    while (fread(&cliente, sizeof(struct Cliente), 1, arquivo)) {
+        if (cliente.cnpj == cnpj) {
+            int senha;
+            printf("Digite sua senha: ");
+            scanf("%d", &senha);
+
+            if (cliente.senha != senha) {
+                printf("Senha incorreta\n");
+                fclose(arquivo);
+                return;
+            }
+
+            float valor;
+            printf("Digite o valor: ");
+            scanf("%f", &valor);
+
+            float tarifa;
+            if (strcmp(cliente.conta, "Comum") == 0) {
+                tarifa = valor * 0.05;
+            } else if (strcmp(cliente.conta, "Plus") == 0) {
+                tarifa = valor * 0.03;
+            }
+
+            float valor_tarifado = valor + tarifa;
+
+            if (cliente.saldo - valor_tarifado >= -1000 && strcmp(cliente.conta, "Comum") == 0) {
+                cliente.saldo -= valor_tarifado;
+                printf("Saldo atual: R$ %.2f\n", cliente.saldo);
+
+                fseek(arquivo, -sizeof(struct Cliente), SEEK_CUR);
+                fwrite(&cliente, sizeof(struct Cliente), 1, arquivo);
+
+                time_t t = time(NULL);
+                struct tm tm = *localtime(&t);
+                char data_str[100];
+                sprintf(data_str, "Data: %02d/%02d/%04d %02d:%02d", tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900, tm.tm_hour, tm.tm_min);
+
+                char historico[500];
+                sprintf(historico, "%s -%.2f (Tarifa: %.2f) - Saldo: %.2f\n", data_str, valor, tarifa, cliente.saldo);
+                strcat(cliente.historico, historico);
+
+                fseek(arquivo, 0, SEEK_CUR);
+                fwrite(&cliente, sizeof(struct Cliente), 1, arquivo);
+
+                fclose(arquivo);
+                return;
+            } else if (cliente.saldo - valor_tarifado >= -5000 && strcmp(cliente.conta, "Plus") == 0) {
+                cliente.saldo -= valor_tarifado;
+                printf("Saldo atual: R$ %.2f\n", cliente.saldo);
+
+                fseek(arquivo, -sizeof(struct Cliente), SEEK_CUR);
+                fwrite(&cliente, sizeof(struct Cliente), 1, arquivo);
+
+                time_t t = time(NULL);
+                struct tm tm = *localtime(&t);
+                char data_str[100];
+                sprintf(data_str, "Data: %02d/%02d/%04d %02d:%02d", tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900, tm.tm_hour, tm.tm_min);
+
+                char historico[500];
+                sprintf(historico, "%s -%.2f (Tarifa: %.2f) - Saldo: %.2f\n", data_str, valor, tarifa, cliente.saldo);
+                strcat(cliente.historico, historico);
+
+                fseek(arquivo, 0, SEEK_CUR);
+                fwrite(&cliente, sizeof(struct Cliente), 1, arquivo);
+
+                fclose(arquivo);
+                return;
+            } else {
+                printf("Saldo insuficiente\n");
+                fclose(arquivo);
+                return;
+            }
+        }
+    }
+
+    printf("Cliente com CNPJ %d não encontrado.\n", cnpj);
+    fclose(arquivo);
 }
 
 
-void deposito(){
-  //
+void deposito() {
+    int cnpj;
+    float valor;
+    printf("Digite o CNPJ referente à conta do depósito: ");
+    scanf("%d", &cnpj);
+    printf("Digite o valor: ");
+    scanf("%f", &valor);
+
+    FILE *arquivo = fopen("clientes.dat", "rb+");
+    if (arquivo == NULL) {
+        printf("Erro ao abrir o arquivo de clientes.\n");
+        exit(1);
+    }
+
+    struct Cliente cliente;
+    while (fread(&cliente, sizeof(struct Cliente), 1, arquivo)) {
+        if (cliente.cnpj == cnpj) {
+            cliente.saldo += valor;
+            fseek(arquivo, -sizeof(struct Cliente), SEEK_CUR);
+            fwrite(&cliente, sizeof(struct Cliente), 1, arquivo);
+            fclose(arquivo);
+
+            time_t t = time(NULL);
+            struct tm tm = *localtime(&t);
+            char data_str[100];
+            sprintf(data_str, "Data: %02d/%02d/%04d %02d:%02d", tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900, tm.tm_hour, tm.tm_min);
+
+            FILE *historico_arquivo = fopen("historico.txt", "a");
+            if (historico_arquivo == NULL) {
+                printf("Erro ao abrir o arquivo de histórico.\n");
+                exit(1);
+            }
+
+            fprintf(historico_arquivo, "%s - Depósito de %.2f para CNPJ: %d\n", data_str, valor, cnpj);
+            fclose(historico_arquivo);
+
+            printf("Depósito realizado com sucesso! Novo saldo: %.2f\n", cliente.saldo);
+            return;
+        }
+    }
+
+    fclose(arquivo);
+    printf("Cliente com CNPJ %d não encontrado.\n", cnpj);
 }
 
 
 void transferencia(){
-  //
+  debito(0,0);
+  deposito(0,0);
 }
 
 
@@ -260,9 +392,9 @@ void menu_cliente(){
           if (menu_cliente == 5) {
               break;
           } else if (menu_cliente == 1) {
-              debito();
+              debito(0,0);
           } else if (menu_cliente == 2) {
-              deposito();
+              deposito(0,0);
           } else if (menu_cliente == 3) {
               extrato();
           }else if (menu_cliente == 4) {
