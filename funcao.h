@@ -24,7 +24,7 @@ void novo_cliente(void);
 void login(void);
 void apagar_clientes(struct Cliente *clientes, int tamanho);
 void listar_clientes(void);
-void apagar_funcionarios(void);
+void apagar_funcionarios(struct Funcionario *funcionarios, int tamanho);
 void listar_funcionarios(void);
 void debito(struct Cliente *clientes, int tamanho);
 void deposito(struct Cliente *clientes, int tamanho);
