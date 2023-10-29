@@ -4,8 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include <unistd.h>
 
+//Função para salvar os clientes criados no arquivo binario
 void salvar_cliente(struct Cliente cliente) {
   FILE *arquivo;
   arquivo = fopen("clientes.dat", "ab");
@@ -17,6 +17,7 @@ void salvar_cliente(struct Cliente cliente) {
   fclose(arquivo);
 }
 
+//Função para salvar os funcionários criados no arquivo binario
 void salvar_funcionario(struct Funcionario funcionario) {
   FILE *arquivo;
   arquivo = fopen("funcionarios.dat", "ab");
@@ -28,7 +29,8 @@ void salvar_funcionario(struct Funcionario funcionario) {
   fclose(arquivo);
 }
 
-int cliente_existe(int cnpj, int senha) {
+//Função para ver se os clientes estão no arquivo binario
+int cliente_existe(int cpf, int senha) {
   FILE *arquivo;
   struct Cliente cliente;
 
@@ -39,7 +41,7 @@ int cliente_existe(int cnpj, int senha) {
   }
 
   while (fread(&cliente, sizeof(struct Cliente), 1, arquivo)) {
-    if (cliente.cnpj == cnpj && cliente.senha == senha) {
+    if (cliente.cpf == cpf && cliente.senha == senha) {
       fclose(arquivo);
       return 1;
     }
@@ -49,7 +51,8 @@ int cliente_existe(int cnpj, int senha) {
   return 0;
 }
 
-int funcionario_existe(int cpf, int senha) {
+//Função para ver se os funcionários estão no arquivo binario
+int funcionario_existe(int cpf_funcionario, int senha) {
   FILE *arquivo;
   struct Funcionario funcionario;
 
@@ -60,7 +63,7 @@ int funcionario_existe(int cpf, int senha) {
   }
 
   while (fread(&funcionario, sizeof(struct Funcionario), 1, arquivo)) {
-    if (funcionario.cpf == cpf && funcionario.senha == senha) {
+    if (funcionario.cpf_funcionario == cpf_funcionario && funcionario.senha == senha) {
       fclose(arquivo);
       return 1;
     }
@@ -70,22 +73,23 @@ int funcionario_existe(int cpf, int senha) {
   return 0;
 }
 
+//Função para criar um novo funcionário
 void novo_funcionario(void) {
-  int cpf;
+  int cpf_funcionario;
   char nome[100];
   int senha;
 
   printf("Digite seu CPF: ");
-  scanf("%d", &cpf);
+  scanf("%d", &cpf_funcionario);
   printf("Digite seu nome: ");
   scanf("%s", nome);
   printf("Digite sua senha: ");
   scanf("%d", &senha);
 
-  if (funcionario_existe(cpf, senha)) {
+  if (funcionario_existe(cpf_funcionario, senha)) {
     printf("Funcionário já cadastrado.\n");
   } else {
-    struct Funcionario novo_funcionario = {cpf, "", senha};
+    struct Funcionario novo_funcionario = {cpf_funcionario, "", senha};
     strcpy(novo_funcionario.nome, nome);
     salvar_funcionario(novo_funcionario);
     printf("Funcionário cadastrado com sucesso!\n");
@@ -93,17 +97,18 @@ void novo_funcionario(void) {
   }
 }
 
+//Função para criar um novo cliente
 void novo_cliente(void) {
-  int cnpj;
-  char razao_social[100];
+  int cpf;
+  char nome_cliente[100];
   char conta[10];
   float saldo;
   int senha;
 
-  printf("Digite seu CNPJ: ");
-  scanf("%d", &cnpj);
-  printf("Digite sua razão social: ");
-  scanf("%s", razao_social);
+  printf("Digite seu CPF: ");
+  scanf("%d", &cpf);
+  printf("Digite seu nome: ");
+  scanf("%s", nome_cliente);
   printf("Digite o tipo da conta (Comum ou Plus): ");
   scanf("%s", conta);
   printf("Digite o saldo inicial: ");
@@ -111,11 +116,11 @@ void novo_cliente(void) {
   printf("Digite sua senha: ");
   scanf("%d", &senha);
 
-  if (cliente_existe(cnpj, senha)) {
+  if (cliente_existe(cpf, senha)) {
     printf("Cliente já cadastrado.\n");
   } else {
-    struct Cliente novo_cliente = {cnpj, "", "", 0, senha};
-    strcpy(novo_cliente.razao_social, razao_social);
+    struct Cliente novo_cliente = {cpf, "", "", 0, senha};
+    strcpy(novo_cliente.nome_cliente, nome_cliente);
     strcpy(novo_cliente.conta, conta);
     novo_cliente.saldo = saldo;
     salvar_cliente(novo_cliente);
@@ -124,32 +129,33 @@ void novo_cliente(void) {
   }
 }
 
+//Função de login para escolher qual conta acessar, a de funcionário ou a de cliente
 void login(void) {
   int tipo_de_login;
   printf("Qual login deseja acessar? (Funcionário = 1) (Cliente = 2): ");
   scanf("%d", &tipo_de_login);
 
   if (tipo_de_login == 1) {
-    int cpf, senha;
+    int cpf_funcionario, senha;
     printf("Digite seu CPF: ");
-    scanf("%d", &cpf);
+    scanf("%d", &cpf_funcionario);
     printf("Digite sua senha: ");
     scanf("%d", &senha);
 
-    if (funcionario_existe(cpf, senha)) {
+    if (funcionario_existe(cpf_funcionario, senha)) {
       printf("Login de funcionário bem-sucedido.\n");
       menu_funcionario();
     } else {
       printf("Login de funcionário inválido.\n");
     }
   } else if (tipo_de_login == 2) {
-    int cnpj, senha;
-    printf("Digite seu CNPJ: ");
-    scanf("%d", &cnpj);
+    int cpf, senha;
+    printf("Digite seu CPF: ");
+    scanf("%d", &cpf);
     printf("Digite sua senha: ");
     scanf("%d", &senha);
 
-    if (cliente_existe(cnpj, senha)) {
+    if (cliente_existe(cpf, senha)) {
       printf("Login de cliente bem-sucedido.\n");
       menu_cliente();
     } else {
@@ -160,6 +166,7 @@ void login(void) {
   }
 }
 
+//Função inicial do programa em que apresenta as principais opções para utilizar o programa
 void menu_login() {
   int menu;
   while (menu != 4) {
@@ -179,10 +186,11 @@ void menu_login() {
   }
 }
 
+//Função para realizar um débito
 void debito(struct Cliente *clientes, int tamanho) {
-  int cnpj;
-  printf("Digite seu CNPJ: ");
-  scanf("%d", &cnpj);
+  int cpf;
+  printf("Digite seu CPF: ");
+  scanf("%d", &cpf);
 
   FILE *arquivo = fopen("clientes.dat", "rb+");
   if (arquivo == NULL) {
@@ -193,7 +201,7 @@ void debito(struct Cliente *clientes, int tamanho) {
   struct Cliente cliente;
 
   while (fread(&cliente, sizeof(struct Cliente), 1, arquivo)) {
-    if (cliente.cnpj == cnpj) {
+    if (cliente.cpf == cpf) {
       int senha;
       printf("Digite sua senha: ");
       scanf("%d", &senha);
@@ -237,18 +245,17 @@ void debito(struct Cliente *clientes, int tamanho) {
           exit(1);
         }
 
-        fprintf(historico_arquivo, "%s - Débito de %.2f saindo do CNPJ: %d\n",
-                data_str, valor, cnpj);
+        fprintf(historico_arquivo, "%s - Débito de %.2f (mais %.2f de tarifa) saindo do CPF: %d\n",
+                data_str, valor, tarifa, cpf);
         fclose(historico_arquivo);
 
         printf("Débito realizado com sucesso! Novo saldo: %.2f\n",
                cliente.saldo);
-        return;
 
         fclose(arquivo);
         return;
 
-    
+
       } else if (cliente.saldo - valor_tarifado >= -5000 &&
                  strcmp(cliente.conta, "Plus") == 0) {
         cliente.saldo -= valor_tarifado;
@@ -269,13 +276,12 @@ void debito(struct Cliente *clientes, int tamanho) {
           exit(1);
         }
 
-        fprintf(historico_arquivo, "%s - Débito de %.2f saindo do CNPJ: %d\n",
-                data_str, valor, cnpj);
+        fprintf(historico_arquivo, "%s - Débito de %.2f (mais %.2f de tarifa) saindo do CPF: %d\n",
+                data_str, valor, tarifa, cpf);
         fclose(historico_arquivo);
 
         printf("Débito realizado com sucesso! Novo saldo: %.2f\n",
                cliente.saldo);
-        return;
 
         fclose(arquivo);
         return;
@@ -287,17 +293,21 @@ void debito(struct Cliente *clientes, int tamanho) {
     }
   }
 
-  printf("Cliente com CNPJ %d não encontrado.\n", cnpj);
+  printf("Cliente com CPF %d não encontrado.\n", cpf);
   fclose(arquivo);
 }
 
+//Função para realizar um depósito
 void deposito(struct Cliente *clientes, int tamanho) {
-  int cnpj;
+  int cpf;
   float valor;
-  printf("Digite o CNPJ referente à conta do depósito: ");
-  scanf("%d", &cnpj);
+  printf("Digite o CPF referente à conta do depósito: ");
+  scanf("%d", &cpf);
   printf("Digite o valor: ");
   scanf("%f", &valor);
+
+  int cpf_real;
+  cpf_real = cpf;
 
   FILE *arquivo = fopen("clientes.dat", "rb+");
   if (arquivo == NULL) {
@@ -307,7 +317,7 @@ void deposito(struct Cliente *clientes, int tamanho) {
 
   struct Cliente cliente;
   while (fread(&cliente, sizeof(struct Cliente), 1, arquivo)) {
-    if (cliente.cnpj == cnpj) {
+    if (cliente.cpf == cpf) {
       cliente.saldo += valor;
       fseek(arquivo, -sizeof(struct Cliente), SEEK_CUR);
       fwrite(&cliente, sizeof(struct Cliente), 1, arquivo);
@@ -325,29 +335,99 @@ void deposito(struct Cliente *clientes, int tamanho) {
         exit(1);
       }
 
-      fprintf(historico_arquivo, "%s - Depósito de %.2f para CNPJ: %d\n",
-              data_str, valor, cnpj);
+      fprintf(historico_arquivo, "%s - Depósito de %.2f para CPF: %d\n", data_str, valor, cpf_real);
       fclose(historico_arquivo);
 
-      printf("Depósito realizado com sucesso! Novo saldo: %.2f\n",
-             cliente.saldo);
+      printf("Depósito realizado com sucesso! Novo saldo: %.2f\n",cliente.saldo);
       return;
     }
   }
 
   fclose(arquivo);
-  printf("Cliente com CNPJ %d não encontrado.\n", cnpj);
+  printf("Cliente com CPF %d não encontrado.\n", cpf);
 }
 
+//Função para realizar uma transfer~encia
 void transferencia() {
   debito(0, 0);
   deposito(0, 0);
 }
 
-void extrato() {
-  //
+//Função para ver o extrato do cliente
+void imprimir_historico(int cpf) {
+    FILE *arquivo = fopen("historico.txt", "r");
+    if (arquivo == NULL) {
+        printf("Erro ao abrir o arquivo de histórico.\n");
+        return;
+    }
+
+    char linha[256];
+    int numero_linha = 1;
+    int encontrou = 0;
+
+    while (fgets(linha, sizeof(linha), arquivo)) {
+        char *cpf_str = strstr(linha, "CPF:");
+        if (cpf_str != NULL) {
+            cpf_str += 5;
+            int cpf_lido;
+            if (sscanf(cpf_str, "%d", &cpf_lido) == 1) {
+                if (cpf_lido == cpf) {
+                    encontrou = 1;
+                    printf("%d - %s", numero_linha, linha);
+                }
+            }
+        }
+        numero_linha++;
+    }
+    fclose(arquivo);
+    if (!encontrou) {
+        printf("Nenhuma transação encontrada para o CPF %d.\n", cpf);
+    }
 }
 
+void extrato(struct Cliente clientes[], int num_clientes) {
+    int cpf;
+    printf("Digite o CPF da conta que quer acessar o extrato: ");
+    scanf("%d", &cpf);
+
+    FILE *arquivo_clientes = fopen("clientes.dat", "rb");
+    if (arquivo_clientes == NULL) {
+        printf("Erro ao abrir o arquivo de clientes.\n");
+        return;
+    }
+
+    struct Cliente cliente;
+    int encontrado = 0;
+
+    while (fread(&cliente, sizeof(struct Cliente), 1, arquivo_clientes) == 1) {
+        if (cliente.cpf == cpf) {
+            encontrado = 1;
+            int senha;
+            printf("Digite a senha referente ao CPF: ");
+            scanf("%d", &senha);
+
+            if (cliente.senha == senha) {
+                printf("Nome: %s\n", cliente.nome_cliente);
+                printf("CPF: %d\n", cliente.cpf);
+                printf("Conta: %s\n", cliente.conta);
+                printf("Saldo atual: %.2f\n", cliente.saldo);
+
+                imprimir_historico(cpf);
+            } else {
+                printf("Senha incorreta\n");
+            }
+            break;
+        }
+    }
+
+    if (!encontrado) {
+        printf("CPF inválido\n");
+    }
+
+    fclose(arquivo_clientes);
+}
+
+//Função para listar todos os clientes criados
 void listar_clientes() {
   FILE *arquivo = fopen("clientes.dat", "rb");
   if (arquivo == NULL) {
@@ -356,12 +436,12 @@ void listar_clientes() {
   }
 
   printf("====================================================\n");
-  printf("| CNPJ | Razão social | Tipo de conta | Saldo |\n");
+  printf("| CPF | NOME | Tipo de conta | Saldo |\n");
   printf("====================================================\n");
 
   struct Cliente cliente;
   while (fread(&cliente, sizeof(struct Cliente), 1, arquivo) == 1) {
-    printf("| %d | %s | %s | %.2f |\n", cliente.cnpj, cliente.razao_social,
+    printf("| %d | %s | %s | %.2f |\n", cliente.cpf, cliente.nome_cliente,
            cliente.conta, cliente.saldo);
   }
 
@@ -369,10 +449,11 @@ void listar_clientes() {
     fclose(arquivo);
 }
 
+//Funçãoar um cliente em específico e todos os seus dados
 void apagar_clientes(struct Cliente *clientes, int tamanho) {
-  int cnpj;
-  printf("Digite o CNPJ da conta que deseja excluir: ");
-  scanf("%d", &cnpj);
+  int cpf;
+  printf("Digite o CPF da conta que deseja excluir: ");
+  scanf("%d", &cpf);
 
   FILE *arquivo = fopen("clientes.dat", "rb+");
   if (arquivo == NULL) {
@@ -385,7 +466,7 @@ void apagar_clientes(struct Cliente *clientes, int tamanho) {
 
   int encontrado = 0;
   while (fread(&cliente, tamanho_cliente, 1, arquivo) == 1) {
-    if (cliente.cnpj == cnpj) {
+    if (cliente.cpf == cpf) {
       encontrado = 1;
       break;
     }
@@ -398,13 +479,14 @@ void apagar_clientes(struct Cliente *clientes, int tamanho) {
 
     fwrite(&cliente, tamanho_cliente, 1, arquivo);
     fclose(arquivo);
-    printf("Cliente com CNPJ %d apagado com sucesso.\n", cnpj);
+    printf("Cliente com CPF %d apagado com sucesso.\n", cpf);
   } else {
     fclose(arquivo);
-    printf("Cliente com CNPJ %d não encontrado.\n", cnpj);
+    printf("Cliente com CPF %d não encontrado.\n", cpf);
   }
 }
 
+//Função para listar todos os funcionários
 void listar_funcionarios() {
   FILE *arquivo = fopen("funcionarios.dat", "rb");
   if (arquivo == NULL) {
@@ -418,17 +500,18 @@ void listar_funcionarios() {
 
   struct Funcionario funcionario;
   while (fread(&funcionario, sizeof(struct Funcionario), 1, arquivo) == 1) {
-    printf("| %d | %s |\n", funcionario.cpf, funcionario.nome);
+    printf("| %d | %s |\n", funcionario.cpf_funcionario, funcionario.nome);
   }
 
   if (fread(&funcionario, sizeof(struct Funcionario), 1, arquivo) == 0)
     fclose(arquivo);
 }
 
+//Função para apagar um funcionário em específico e todos os seus dados
 void apagar_funcionarios(struct Funcionario *funcionarios, int tamanho) {
-  int cpf;
+  int cpf_funcionario;
   printf("Digite o CPF da conta que deseja excluir: ");
-  scanf("%d", &cpf);
+  scanf("%d", &cpf_funcionario);
 
   FILE *arquivo = fopen("funcionarios.dat", "rb+");
   if (arquivo == NULL) {
@@ -441,7 +524,7 @@ void apagar_funcionarios(struct Funcionario *funcionarios, int tamanho) {
 
   int encontrado = 0;
   while (fread(&funcionario, tamanho_funcionario, 1, arquivo) == 1) {
-    if (funcionario.cpf == cpf) {
+    if (funcionario.cpf_funcionario == cpf_funcionario) {
       encontrado = 1;
       break;
     }
@@ -454,13 +537,14 @@ void apagar_funcionarios(struct Funcionario *funcionarios, int tamanho) {
 
     fwrite(&funcionario, tamanho_funcionario, 1, arquivo);
     fclose(arquivo);
-    printf("Funcionário com CPF %d apagado com sucesso.\n", cpf);
+    printf("Funcionário com CPF %d apagado com sucesso.\n", cpf_funcionario);
   } else {
     fclose(arquivo);
-    printf("Funcionário com CPF %d não encontrado.\n", cpf);
+    printf("Funcionário com CPF %d não encontrado.\n", cpf_funcionario);
   }
 }
 
+//Função do menu do cliente
 void menu_cliente() {
   int menu_cliente;
 
@@ -480,13 +564,14 @@ void menu_cliente() {
     } else if (menu_cliente == 2) {
       deposito(0, 0);
     } else if (menu_cliente == 3) {
-      extrato();
+      extrato(0, 0);
     } else if (menu_cliente == 4) {
       transferencia();
     }
   }
 }
 
+//Função do menu do funcionário
 void menu_funcionario() {
   int menu_funcionario;
   int tamanho = 0;
