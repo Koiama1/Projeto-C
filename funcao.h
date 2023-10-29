@@ -5,8 +5,8 @@
 #include <stdlib.h>
 
 struct Cliente{
-    int cnpj;
-    char razao_social[100];
+    int cpf;
+    char nome_cliente[100];
     char conta[10];
     float saldo;
     int senha;
@@ -14,7 +14,7 @@ struct Cliente{
 };
 
 struct Funcionario {
-    int cpf;
+    int cpf_funcionario;
     char nome[100];
     int senha;
 };
@@ -28,10 +28,11 @@ void apagar_funcionarios(struct Funcionario *funcionarios, int tamanho);
 void listar_funcionarios(void);
 void debito(struct Cliente *clientes, int tamanho);
 void deposito(struct Cliente *clientes, int tamanho);
-void extrato(void);
+void extrato(struct Cliente clientes[], int num_clientes);
 void transferencia(void);
 void menu_login(void);
 void menu_funcionario(void);
 void menu_cliente(void);
+void imprimir_historico(int cpf);
 
 #endif
