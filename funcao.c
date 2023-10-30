@@ -5,6 +5,10 @@
 #include <string.h>
 #include <time.h>
 
+//Aluno: João Pedro Lopes Santana Villas Bôas - RA: 24.123.071-3
+//Aluno: João Pedro Gardenghi Peterutto - RA: 24.123.045-7
+//Aluno: Gabriel Koiama Rocha de Oliveira Lira - RA: 24.123.051-5
+
 //Função para salvar os clientes criados no arquivo binario
 void salvar_cliente(struct Cliente cliente) {
   FILE *arquivo;
@@ -29,7 +33,7 @@ void salvar_funcionario(struct Funcionario funcionario) {
   fclose(arquivo);
 }
 
-//Função para ver se os clientes estão no arquivo binario
+//Função para ver se os clientes estão cadastrados no arquivo binario
 int cliente_existe(int cpf, int senha) {
   FILE *arquivo;
   struct Cliente cliente;
@@ -51,7 +55,7 @@ int cliente_existe(int cpf, int senha) {
   return 0;
 }
 
-//Função para ver se os funcionários estão no arquivo binario
+//Função para ver se os funcionários estão cadastrados no arquivo binario
 int funcionario_existe(int cpf_funcionario, int senha) {
   FILE *arquivo;
   struct Funcionario funcionario;
@@ -347,13 +351,13 @@ void deposito(struct Cliente *clientes, int tamanho) {
   printf("Cliente com CPF %d não encontrado.\n", cpf);
 }
 
-//Função para realizar uma transfer~encia
+//Função para realizar uma transferência
 void transferencia() {
   debito(0, 0);
   deposito(0, 0);
 }
 
-//Função para ver o extrato do cliente
+//Função que irá acessar o histórico de transações e imprimi-lo
 void imprimir_historico(int cpf) {
     FILE *arquivo = fopen("historico.txt", "r");
     if (arquivo == NULL) {
@@ -385,6 +389,7 @@ void imprimir_historico(int cpf) {
     }
 }
 
+//Função para acessar os dados do cliente para poder chamar a função imprimir_histórico
 void extrato(struct Cliente clientes[], int num_clientes) {
     int cpf;
     printf("Digite o CPF da conta que quer acessar o extrato: ");
@@ -449,7 +454,7 @@ void listar_clientes() {
     fclose(arquivo);
 }
 
-//Funçãoar um cliente em específico e todos os seus dados
+//Função para apagar um cliente em específico e todos os seus dados
 void apagar_clientes(struct Cliente *clientes, int tamanho) {
   int cpf;
   printf("Digite o CPF da conta que deseja excluir: ");
@@ -486,7 +491,7 @@ void apagar_clientes(struct Cliente *clientes, int tamanho) {
   }
 }
 
-//Função para listar todos os funcionários
+//Função para listar todos os funcionários criados
 void listar_funcionarios() {
   FILE *arquivo = fopen("funcionarios.dat", "rb");
   if (arquivo == NULL) {
